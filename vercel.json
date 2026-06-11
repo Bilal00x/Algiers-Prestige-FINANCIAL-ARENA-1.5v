@@ -1,0 +1,15 @@
+{
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://yyvfvhscehfxxmccsvrb.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_DgJzmAs6Np_wnC_WI7Eb0w_tBS8QTKx",
+    "TURSO_DATABASE_URL": "libsql://database-chestnut-umbrella-vercel-icfg-jk4buufifyjuopf1qoq37v7s.aws-eu-west-1.turso.io",
+    "TURSO_AUTH_TOKEN": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJleHAiOjE3ODE4MDg5OTIsImlhdCI6MTc4MTIwNDE5MiwiaWQiOiIwMTllYjdlZC1iNDAxLTdhNDItOGViMy01OTdlZjg4MDg0ZGIiLCJyaWQiOiJmOTU3ZWJlMS1kNTc2LTQ2OTktYTAxZC01MzViZjEzZDUzYTAifQ.4cvJEeaY2ujPtuD_HYD8THUmlmwe1jsrsItj1xtbuP8NcShj-DoTe9YotsbuAVkef_o1wHXRa8QvfqrSLWJqDw",
+    "SUPABASE_SERVICE_ROLE_KEY": "sb_secret_Xode7ApTAvwH_iZTh85xpQ_LckIs0Ty",
+    "VITE_SUPABASE_URL": "https://yyvfvhscehfxxmccsvrb.supabase.co",
+    "VITE_SUPABASE_ANON_KEY": "sb_publishable_DgJzmAs6Np_wnC_WI7Eb0w_tBS8QTKx",
+    "VITE_GOOGLE_CLIENT_ID": "1065078894672-rmp5kp8vfjns5rn9kp5psfp16g691043.apps.googleusercontent.com",
+    "VITE_GOOGLE_AUTH_PROXY": "https://designarena.ai/auth/google/callback",
+    "FULLSTACK_PROJECT_REF": "yyvfvhscehfxxmccsvrb",
+    "FULLSTACK_RESTORE_API_URL": "https://designarena.ai/api/fullstack-restore"
+  }
+}

@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/* Print styles */
+@media print {
+  body { background: white !important; color: black !important; }
+  .sticky { position: static !important; }
+  header, footer, nav, .no-print { display: none !important; }
+  [class*="bg-"][class*="0A0A0A"] { background: white !important; }
+  [class*="bg-"][class*="0F0F0F"] { background: #f5f5f5 !important; border-color: #ddd !important; }
+  [class*="text-white"], [class*="text-zinc-100"], [class*="text-zinc-200"], [class*="text-zinc-300"] { color: #111 !important; }
+  [class*="text-zinc-400"], [class*="text-zinc-500"], [class*="text-zinc-600"] { color: #555 !important; }
+  [class*="border-zinc-800"], [class*="border-zinc-900"], [class*="border-zinc-700"] { border-color: #ccc !important; }
+  [class*="bg-zinc-900"], [class*="bg-zinc-950"] { background: #eee !important; }
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  table { font-size: 11px !important; }
+  th, td { padding: 8px 6px !important; }
+  .gap-6 { gap: 12px !important; }
+  .p-6 { padding: 12px !important; }
+  .p-5 { padding: 10px !important; }
+  .p-4 { padding: 10px !important; }
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
