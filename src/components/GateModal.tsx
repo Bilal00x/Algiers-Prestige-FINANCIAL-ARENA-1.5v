@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CreditCard, Save, DollarSign } from 'lucide-react';
+import { useSettings } from '../contexts/SettingsContext';
 import { useFinancial } from '../contexts/FinancialContext';
 
 interface GateModalProps {
@@ -9,7 +10,7 @@ interface GateModalProps {
   gateIdToEdit?: number | null;
 }
 
-export const GateModal: React.FC<GateModalProps> = ({ isOpen, onClose, gateIdToEdit }) => {
+export const GateModal: React.FC<GateModalProps> = ({ isOpen, onClose, gateIdToEdit }) => { const { t } = useSettings();
   const { gates, createGate, updateGate } = useFinancial();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
@@ -17,7 +18,7 @@ export const GateModal: React.FC<GateModalProps> = ({ isOpen, onClose, gateIdToE
   const [currency, setCurrency] = useState('DZD');
   const [submitting, setSubmitting] = useState(false);
 
-  const currencies = ['DZD', 'USD', 'EUR', 'GBP'];
+  const currencies = ['DZD', 'USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CAD', 'AUD', 'CHF', 'AED'];
 
   useEffect(() => {
     if (gateIdToEdit) {
@@ -89,7 +90,7 @@ export const GateModal: React.FC<GateModalProps> = ({ isOpen, onClose, gateIdToE
             <div className="flex items-center gap-2 mb-6">
               <CreditCard className="w-5 h-5 text-zinc-400" />
               <h3 className="text-lg font-semibold tracking-tight text-zinc-100 font-sans uppercase">
-                {gateIdToEdit ? 'Modify Gate Configuration' : 'Establish New Gate Slot'}
+                {gateIdToEdit ? t('modal.editGate') : t('modal.addGate')} <DollarSign className="inline-block ml-2 w-4 h-4 text-emerald-500"/>
               </h3>
             </div>
 

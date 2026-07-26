@@ -19,11 +19,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, o
     { code: 'fr', label: 'Français' },
   ];
 
-  const currencies: Array<{ code: 'DZD' | 'USD' | 'EUR' | 'GBP'; label: string }> = [
-    { code: 'DZD', label: 'DA - دينار جزائري' },
-    { code: 'USD', label: '$ - دولار أمريكي' },
-    { code: 'EUR', label: '€ - يورو' },
-    { code: 'GBP', label: '£ - جنيه إسترليني' },
+  const currencies: Array<{ code: 'DZD' | 'USD' | 'EUR' | 'GBP' | 'JPY' | 'CNY' | 'CAD' | 'AUD' | 'CHF' | 'AED'; label: string }> = [
+    { code: 'DZD', label: 'DA - ' + t('settings.dzd') },
+    { code: 'USD', label: '$ - ' + t('settings.usd') },
+    { code: 'EUR', label: '€ - ' + t('settings.eur') },
+    { code: 'GBP', label: '£ - ' + t('settings.gbp') },
+    { code: 'JPY', label: '¥ - ' + t('settings.jpy') },
+    { code: 'CNY', label: '¥ - ' + t('settings.cny') },
+    { code: 'CAD', label: 'C$ - ' + t('settings.cad') },
+    { code: 'AUD', label: 'A$ - ' + t('settings.aud') },
+    { code: 'CHF', label: 'CHF - ' + t('settings.chf') },
+    { code: 'AED', label: 'د.إ - ' + t('settings.aed') },
   ];
 
 

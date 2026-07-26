@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Send } from 'lucide-react';
+import { X, Save, Send, DollarSign } from 'lucide-react';
 import { useFinancial } from '../contexts/FinancialContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -15,7 +16,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   onClose,
   txIdToEdit,
   defaultGateId,
-}) => {
+}) => { const { t } = useSettings();
   const { gates, transactions, createTransaction, updateTransaction } = useFinancial();
   const [gateId, setGateId] = useState('');
   const [recipient, setRecipient] = useState('');
@@ -121,7 +122,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             <div className="flex items-center gap-2 mb-6">
               <Send className="w-5 h-5 text-zinc-400" />
               <h3 className="text-lg font-semibold tracking-tight text-zinc-100 font-sans uppercase">
-                {txIdToEdit ? 'Modify Ledger Entry' : 'Queue Transfer Action'}
+                {txIdToEdit ? t('modal.editTransaction') : t('modal.addTransaction')} <DollarSign className="inline-block ml-2 w-4 h-4 text-emerald-500"/>
               </h3>
             </div>
 
@@ -304,7 +305,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                   className="px-4 py-2 text-xs font-medium uppercase tracking-widest text-black bg-white hover:bg-zinc-200 disabled:bg-zinc-800 disabled:text-zinc-600 rounded flex items-center gap-2 transition-all"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  {submitting ? 'Processing...' : 'Queue Action'}
+                  {submitting ? 'Processing...' : t('modal.addTransaction')}
                 </button>
               </div>
             </form>

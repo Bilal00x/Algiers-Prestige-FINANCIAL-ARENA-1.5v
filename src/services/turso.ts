@@ -1,7 +1,7 @@
 import { createClient } from '@libsql/client';
 
-const tursoUrl = import.meta.env.TURSO_DATABASE_URL || '';
-const tursoToken = import.meta.env.TURSO_AUTH_TOKEN || '';
+const tursoUrl = import.meta.env.STORAGE_URL || '';
+const tursoToken = import.meta.env.STORAGE_AUTH_TOKEN || '';
 
 if (!tursoUrl) {
   console.warn('Turso credentials not found.');

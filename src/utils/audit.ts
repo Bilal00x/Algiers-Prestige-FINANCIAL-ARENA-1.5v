@@ -8,6 +8,7 @@ export interface AuditEntry {
   entityId: number | string;
   summary: string;
   performedBy?: string;
+  amount?: number;
 }
 
 export function getAuditLog(): AuditEntry[] {

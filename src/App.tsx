@@ -9,12 +9,16 @@ import { Ledger } from './pages/Ledger';
 import { Archive } from './pages/Archive';
 import { GateModal } from './components/GateModal';
 import { TransactionModal } from './components/TransactionModal';
+import { CombinedModal } from './components/CombinedModal';
+import { InvoiceModal } from './components/InvoiceModal';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { SettingsModal } from './components/SettingsModal';
 import { ToastContainer } from './components/Toast';
 import { LockScreen } from './components/LockScreen';
 import { UserManagementModal } from './components/UserManagementModal';
 import { AuditLogModal } from './components/AuditLogModal';
+import { useLocation } from 'react-router-dom';
+import Register from './pages/Register';
 
 const AppContent: React.FC = () => {
   const { deleteGate, deleteTransaction } = useFinancial();
@@ -26,6 +30,7 @@ const AppContent: React.FC = () => {
     return !unlocked;
   });
   const [isGateModalOpen, setIsGateModalOpen] = useState(false);
+  const [isCombinedModalOpen, setIsCombinedModalOpen] = useState(false);
   const [gateIdToEdit, setGateIdToEdit] = useState<number | null>(null);
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [txIdToEdit, setTxIdToEdit] = useState<number | null>(null);
@@ -36,6 +41,8 @@ const AppContent: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isUserManagementOpen, setIsUserManagementOpen] = useState(false);
   const [isAuditLogOpen, setIsAuditLogOpen] = useState(false);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+  const [invoiceRecipient, setInvoiceRecipient] = useState('');
 
   if (authLoading) {
     return (
@@ -49,10 +56,21 @@ const AppContent: React.FC = () => {
     return <LockScreen onUnlock={() => setLocked(false)} />;
   }
 
+  // If no authenticated user, show the new premium login page
+  const location = useLocation();
+  if (!currentUser && location.pathname !== "/register") {
+    // Lazy‑load the Login component to keep bundle size small
+    const Login = React.lazy(() => import('./pages/Login'));
+    return (
+      <React.Suspense fallback={<div className="fixed inset-0 flex items-center justify-center bg-neutral-900"><span className="text-xs text-neutral-400">Loading…</span></div>}>
+        <Login />
+      </React.Suspense>
+    );
+  }
+
   // Handlers for Gate Modal
   const handleOpenAddGate = () => {
-    setGateIdToEdit(null);
-    setIsGateModalOpen(true);
+    setIsCombinedModalOpen(true);
   };
 
   const handleOpenEditGate = (id: number) => {
@@ -61,14 +79,14 @@ const AppContent: React.FC = () => {
   };
 
   // Handlers for Transaction Modal
-  const handleOpenAddTx = () => {
-    setTxIdToEdit(null);
-    setIsTxModalOpen(true);
-  };
-
   const handleOpenEditTx = (id: number) => {
     setTxIdToEdit(id);
     setIsTxModalOpen(true);
+  };
+
+  const handleOpenInvoice = (recipient?: string) => {
+    setInvoiceRecipient(recipient || '');
+    setIsInvoiceOpen(true);
   };
 
   // Handlers for Delete Gate
@@ -102,7 +120,6 @@ const AppContent: React.FC = () => {
       {/* Header Navigation */}
       <Navbar
         onAddGate={handleOpenAddGate}
-        onAddTransaction={handleOpenAddTx}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenUserManagement={() => setIsUserManagementOpen(true)}
         onOpenAuditLog={() => setIsAuditLogOpen(true)}
@@ -123,6 +140,7 @@ const AppContent: React.FC = () => {
               <Dashboard
                 onEditGate={handleOpenEditGate}
                 onDeleteGate={handleOpenDeleteGate}
+                onOpenInvoice={() => handleOpenInvoice()}
               />
             }
           />
@@ -132,6 +150,7 @@ const AppContent: React.FC = () => {
               <Ledger
                 onEditTransaction={handleOpenEditTx}
                 onDeleteTransaction={handleOpenDeleteTx}
+                onOpenInvoice={handleOpenInvoice}
               />
             }
           />
@@ -140,15 +159,20 @@ const AppContent: React.FC = () => {
             element={
               <Archive
                 onDeleteTransaction={handleOpenDeleteTx}
+                onOpenInvoice={handleOpenInvoice}
               />
             }
+          />
+        <Route
+            path="/register"
+            element={<Register />}
           />
         </Routes>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-zinc-900 bg-black/40 py-6 text-center text-[10px] font-mono tracking-widest text-zinc-600 uppercase">
-        © {new Date().getFullYear()} Algiers Prestige Financial Arena. All rights reserved. SECURE AUDIT UPLINK.
+        © {new Date().getFullYear()} Algiers Prestige Financial Arena. All rights reserved. Version 2.0 Upgrade – In Progress.
       </footer>
 
       {/* Global Modals */}
@@ -163,6 +187,16 @@ const AppContent: React.FC = () => {
         onClose={() => setIsTxModalOpen(false)}
         txIdToEdit={txIdToEdit}
       />
+        <CombinedModal
+          isOpen={isCombinedModalOpen}
+          onClose={() => setIsCombinedModalOpen(false)}
+        />
+
+        <InvoiceModal
+          isOpen={isInvoiceOpen}
+          onClose={() => { setIsInvoiceOpen(false); setInvoiceRecipient(''); }}
+          defaultRecipient={invoiceRecipient}
+        />
 
       {/* Gate Deletion Confirmation */}
       <ConfirmationModal

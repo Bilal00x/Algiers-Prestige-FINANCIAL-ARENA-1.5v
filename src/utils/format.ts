@@ -3,11 +3,17 @@ const currencySymbols: Record<string, string> = {
   USD: '$',
   EUR: '€',
   GBP: '£',
+  JPY: '¥',
+  CNY: '¥',
+  CAD: 'C$',
+  AUD: 'A$',
+  CHF: 'CHF',
+  AED: 'د.إ',
 };
 
 export function formatCurrency(amount: number, currency: string = 'DZD'): string {
   const symbol = currencySymbols[currency] || currency;
-  const formatted = new Intl.NumberFormat('fr-DZ', {
+  const formatted = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   }).format(amount);

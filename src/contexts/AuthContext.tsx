@@ -32,20 +32,22 @@ const USERS_KEY = 'app_users';
 const SESSION_KEY = 'app_session';
 const FAILED_ATTEMPTS_KEY = 'app_failed_attempts';
 
-const SEEDED_ADMIN_ID = 'seeded-admin';
-const SEEDED_ADMIN_NAME = 'admin';
-const SEEDED_ADMIN_EMAIL = 'bilalkalss23@gmail.com';
-const SEEDED_ADMIN_PASSWORD = 'BIlal2003@Dz';
+
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
+import bcrypt from 'bcryptjs';
+
+const SEEDED_ADMIN_ID = 'seeded-admin';
+const SEEDED_ADMIN_NAME = 'admin';
+const SEEDED_ADMIN_EMAIL = 'admin@algiersprestige.com';
+
 async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // Use bcrypt with a work factor of 12 (adjust as needed)
+  const saltRounds = 12;
+  const hashed = await bcrypt.hash(password, saltRounds);
+  return hashed;
 }
 
 function sanitizeInput(input: string): string {
@@ -85,7 +87,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const existing = loadUsers();
     const hasSeededAdmin = existing.some(u => u.id === SEEDED_ADMIN_ID);
     if (!hasSeededAdmin) {
-      const hashed = await hashPassword(SEEDED_ADMIN_PASSWORD);
+      const envPass = import.meta.env.VITE_INITIAL_ADMIN_PASSCODE;
+      const plainPass = envPass || [...crypto.getRandomValues(new Uint8Array(32))]
+        .map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 32);
+      if (!envPass) {
+        console.warn('Seeded admin passcode:', plainPass);
+      }
+      const hashed = await hashPassword(plainPass);
       const adminUser: AppUser = {
         id: SEEDED_ADMIN_ID,
         name: SEEDED_ADMIN_NAME,
@@ -156,8 +164,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
 
-    const hashedInput = await hashPassword(passcode);
-    if (user.passcode !== hashedInput) {
+    const passwordMatches = await bcrypt.compare(passcode, user.passcode);
+    if (!passwordMatches) {
       attempts[attemptKey] = {
         count: (attempts[attemptKey]?.count || 0) + 1,
         lastAttempt: Date.now(),
@@ -221,6 +229,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const updateUser = useCallback(async (id: string, updates: Partial<AppUser>): Promise<boolean> => {
+    // Protect seeded admin
     if (id === SEEDED_ADMIN_ID && updates.role && updates.role !== 'admin') return false;
     if (id === SEEDED_ADMIN_ID && updates.active === false) return false;
 
@@ -253,6 +262,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteUser = useCallback((id: string): boolean => {
     if (id === SEEDED_ADMIN_ID) return false;
+
     const currentUsers = loadUsers();
     if (currentUsers.length <= 1) return false;
     const updated = currentUsers.filter((u) => u.id !== id);

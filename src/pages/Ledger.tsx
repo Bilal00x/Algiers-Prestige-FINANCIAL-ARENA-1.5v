@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { useFinancial, Transaction } from '../contexts/FinancialContext';
-import { formatDZD, formatDate } from '../utils/format';
+import { formatDate } from '../utils/format';
+import { useSettings } from '../contexts/SettingsContext';
 import { downloadCSV } from '../utils/export';
-import { Edit2, Trash2, Check, X, Search, Calendar, ArrowUpRight, ArrowDownLeft, FileCheck, FileClock, Archive, Download } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Edit2, Trash2, Check, X, Search, Calendar, ArrowUpRight, ArrowDownLeft, FileCheck, FileClock, Archive, Download, FileText } from 'lucide-react';
 
 interface LedgerProps {
   onEditTransaction: (id: number) => void;
   onDeleteTransaction: (id: number) => void;
+  onOpenInvoice: (recipient?: string) => void;
 }
 
-export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTransaction }) => {
+export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTransaction, onOpenInvoice }) => {
   const { transactions, updateTransaction, archiveTransaction, loading } = useFinancial();
+  const { t, formatCurrency } = useSettings();
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'deposit' | 'withdrawal'>('all');
@@ -60,13 +65,13 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-4 border-b border-zinc-900 mb-6">
         <div>
-          <span className="text-[10px] font-mono tracking-[0.2em] text-zinc-500 uppercase">
-            Financial Audit
+          <span className="text-sm font-mono tracking-wide text-zinc-400 uppercase">
+            {t('ledger.subtitle')}
           </span>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans mt-1">
-            TRANSACTION LEDGER
+            {t('ledger.title').toUpperCase()}
           </h1>
         </div>
 
@@ -76,7 +81,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
               onClick={() => setSelectedDate('')}
               className="text-xs text-zinc-400 hover:text-white px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded font-sans transition-all"
             >
-              Clear Date Filter
+              {t('ledger.clearFilter')}
             </button>
           )}
           <button
@@ -93,10 +98,17 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
             className="flex items-center gap-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-[10px] font-bold uppercase tracking-wider text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-all"
           >
             <Download className="w-3.5 h-3.5" />
-            Export
+            {t('ledger.export')}
+          </button>
+            <button
+              onClick={() => onOpenInvoice()}
+              className="flex items-center gap-1 px-3 py-1.5 bg-emerald-950/20 border border-emerald-900/30 rounded text-[10px] font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40 transition-all"
+            >
+            <FileText className="w-3.5 h-3.5" />
+            {t('invoice.invoice')}
           </button>
           <span className="text-xs text-zinc-500 font-mono">
-            {filteredTransactions.length} records matching filters
+            {t('ledger.recordsCount').replace('{count}', String(filteredTransactions.length))}
           </span>
         </div>
       </div>
@@ -107,7 +119,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-600" />
             <input
               type="text"
-              placeholder="Search counterparties or notes..."
+              placeholder={t('ledger.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-zinc-900/60 border border-zinc-800/80 rounded text-zinc-200 text-sm focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700 font-sans"
@@ -133,7 +145,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              All Types
+                {t('ledger.allTypes')}
             </button>
             <button
               onClick={() => setFilterType('deposit')}
@@ -143,7 +155,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              Deposits
+                {t('ledger.deposits')}
             </button>
             <button
               onClick={() => setFilterType('withdrawal')}
@@ -153,7 +165,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              Withdrawals
+                {t('ledger.withdrawals')}
             </button>
           </div>
 
@@ -166,7 +178,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              All Status
+                {t('ledger.allStatus')}
             </button>
             <button
               onClick={() => setFilterStatus('Accepted')}
@@ -176,7 +188,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              Accepted
+                {t('ledger.accepted')}
             </button>
             <button
               onClick={() => setFilterStatus('Pending')}
@@ -186,7 +198,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              Pending
+                {t('ledger.pending')}
             </button>
           </div>
         </div>
@@ -195,16 +207,16 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
       {loading && transactions.length === 0 ? (
         <div className="text-center py-12">
           <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase">
-            Loading Ledger Records...
+            {t('ledger.loadingRecords')}
           </span>
         </div>
       ) : filteredTransactions.length === 0 ? (
         <div className="rounded-lg border border-dashed border-zinc-800 p-12 text-center bg-[#0F0F0F]">
           <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase block mb-2">
-            No Records Located
+            {t('ledger.noRecords')}
           </span>
           <p className="text-sm text-zinc-400 max-w-md mx-auto">
-            Adjust your search filters, select a different date, or record a new transaction to populate the ledger.
+            {t('ledger.adjustFilters')}
           </p>
         </div>
       ) : (
@@ -223,25 +235,25 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                   <thead>
                     <tr className="border-b border-zinc-900 bg-zinc-950/40">
                       <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                        Recipient & Gate Info
+                        {t('ledger.recipient')}
                       </th>
                       <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                        Timestamp
+                        {t('ledger.timestamp')}
                       </th>
                       <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                        Amount & Type
+                        {t('ledger.amount')}
                       </th>
                       <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                        Document Status
+                        {t('ledger.status')}
                       </th>
                       <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                        Comments / Notes
+                        {t('ledger.comments')}
                       </th>
                       <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans text-center">
-                        Verified
+                        {t('ledger.verified')}
                       </th>
                       <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans text-right">
-                        Actions
+                        {t('ledger.actions')}
                       </th>
                     </tr>
                   </thead>
@@ -258,8 +270,8 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                               <span className="text-xs font-bold text-zinc-100 block">
                                 {tx.recipient}
                               </span>
-                              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mt-0.5">
-                                {tx.gate?.name || 'Gate Reference'} ({tx.gate?.code || 'N/A'})
+                              <span onClick={() => navigate('/')} className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mt-0.5 cursor-pointer hover:text-emerald-400 transition-colors">
+                                {tx.gate?.name || t('ledger.gateReference')} ({tx.gate?.code || t('ledger.na')})
                               </span>
                             </div>
                           </td>
@@ -280,7 +292,7 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                                   tx.type === 'deposit' ? 'text-emerald-400' : 'text-rose-400'
                                 }`}
                               >
-                                {tx.type === 'deposit' ? '+' : '-'} {formatDZD(Math.abs(tx.amount))}
+                                {tx.type === 'deposit' ? '+' : '-'} {formatCurrency(Math.abs(tx.amount))}
                               </span>
                             </div>
                           </td>
@@ -317,12 +329,12 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                                     onClick={() => toggleComment(tx.id)}
                                     className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 mt-1 transition-colors block"
                                   >
-                                    {isExpanded ? 'Show Less' : 'Read Full Note'}
+                                    {isExpanded ? t('ledger.showLess') : t('ledger.readFullNote')}
                                   </button>
                                 )}
                               </div>
                             ) : (
-                              <span className="text-xs text-zinc-600 font-sans italic">No remarks</span>
+                              <span className="text-xs text-zinc-600 font-sans italic">{t('ledger.noRemarks')}</span>
                             )}
                           </td>
 
@@ -338,12 +350,12 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                               {tx.verified ? (
                                 <>
                                   <Check className="w-3 h-3 text-emerald-500" />
-                                  Verified
+                                  {t('ledger.verified')}
                                 </>
                               ) : (
                                 <>
                                   <X className="w-3 h-3 text-zinc-600" />
-                                  Unverified
+                                  {t('ledger.unverified')}
                                 </>
                               )}
                             </button>
@@ -352,23 +364,30 @@ export const Ledger: React.FC<LedgerProps> = ({ onEditTransaction, onDeleteTrans
                           <td className="px-4 py-4 text-right">
                             <div className="flex gap-1 justify-end">
                               <button
+                                onClick={() => onOpenInvoice(tx.recipient)}
+                                className="p-1.5 text-emerald-500 hover:text-emerald-400 hover:bg-emerald-950/20 border border-transparent hover:border-emerald-900/30 rounded transition-all"
+                                title="Generate Invoice"
+                              >
+                                <FileText className="w-3.5 h-3.5" />
+                              </button>
+                              <button
                                 onClick={() => onEditTransaction(tx.id)}
                                 className="p-1.5 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 rounded transition-all"
-                                title="Modify Record"
+                                title={t('ledger.modifyRecord')}
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => archiveTransaction(tx.id)}
                                 className="p-1.5 text-zinc-500 hover:text-amber-400 hover:bg-amber-950/20 border border-transparent hover:border-amber-900/30 rounded transition-all"
-                                title="Archive Record"
+                                title={t('ledger.archiveRecord')}
                               >
                                 <Archive className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => onDeleteTransaction(tx.id)}
                                 className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-950/20 border border-transparent hover:border-rose-900/30 rounded transition-all"
-                                title="Delete Record"
+                                title={t('ledger.deleteRecord')}
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>

@@ -1,17 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { useFinancial, Transaction } from '../contexts/FinancialContext';
 import { formatDZD, formatDate, computeDailySummaries, computeWeeklySummaries, computeMonthlySummaries, DaySummary, PeriodSummary } from '../utils/format';
-import { RotateCcw, Trash2, Search, Calendar, ArrowUpRight, ArrowDownLeft, FileCheck, FileClock, BarChart3, List, ChevronDown, ChevronUp, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
+import { useSettings } from '../contexts/SettingsContext';
+import { RotateCcw, Trash2, Search, Calendar, ArrowUpRight, ArrowDownLeft, FileCheck, FileClock, BarChart3, List, ChevronDown, ChevronUp, TrendingUp, TrendingDown, DollarSign, FileText } from 'lucide-react';
 
 type ViewMode = 'summary' | 'records';
 type PeriodMode = 'daily' | 'weekly' | 'monthly';
 
 interface ArchiveProps {
   onDeleteTransaction: (id: number) => void;
+  onOpenInvoice: (recipient?: string) => void;
 }
 
-export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
+export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction, onOpenInvoice }) => {
   const { transactions, archivedTransactions, unarchiveTransaction, loading } = useFinancial();
+  const { t, formatCurrency } = useSettings();
   const allTx = useMemo(() => [...transactions, ...archivedTransactions], [transactions, archivedTransactions]);
 
   const [viewMode, setViewMode] = useState<ViewMode>('summary');
@@ -95,13 +98,13 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-4 border-b border-zinc-900 mb-6">
         <div>
-          <span className="text-[10px] font-mono tracking-[0.2em] text-zinc-500 uppercase">
-            Data Management
+          <span className="text-sm font-mono tracking-wide text-zinc-400 uppercase">
+            {t('archive.subtitle')}
           </span>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans mt-1">
-            {viewMode === 'summary' ? 'DAILY FLOW ARCHIVE' : 'ARCHIVED RECORDS'}
+            {viewMode === 'summary' ? t('archive.title').toUpperCase() : t('archive.recordsView').toUpperCase()}
           </h1>
         </div>
 
@@ -116,7 +119,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
               }`}
             >
               <BarChart3 className="w-3 h-3" />
-              Summary
+              {t('archive.summary')}
             </button>
             <button
               onClick={() => setViewMode('records')}
@@ -127,14 +130,21 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
               }`}
             >
               <List className="w-3 h-3" />
-              Records
+              {t('archive.recordsView')}
             </button>
           </div>
           <span className="text-xs text-zinc-500 font-mono">
             {viewMode === 'summary'
-              ? `${allTx.length} total entries`
-              : `${filteredArchived.length} archived records`}
+              ? `${allTx.length} ${t('archive.totalEntries')}`
+              : `${filteredArchived.length} ${t('archive.archivedRecords')}`}
           </span>
+          <button
+            onClick={() => onOpenInvoice()}
+            className="flex items-center gap-1 px-3 py-1.5 bg-emerald-950/20 border border-emerald-900/30 rounded text-[10px] font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40 transition-all"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            {t('invoice.invoice')}
+          </button>
         </div>
       </div>
 
@@ -146,7 +156,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
             <div className="bg-[#0F0F0F] border border-zinc-800 rounded-lg p-5">
               <div className="flex flex-wrap items-center gap-3 mb-5">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mr-2">
-                  Aggregate By:
+                  {t('archive.aggregateBy')}
                 </span>
                 {(['daily', 'weekly', 'monthly'] as PeriodMode[]).map((mode) => (
                   <button
@@ -158,7 +168,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                         : 'bg-zinc-900/40 border-zinc-800/60 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
                     }`}
                   >
-                    {mode === 'daily' ? 'Daily' : mode === 'weekly' ? 'Weekly' : 'Monthly'}
+                    {mode === 'daily' ? t('archive.daily') : mode === 'weekly' ? t('archive.weekly') : t('archive.monthly')}
                   </button>
                 ))}
               </div>
@@ -170,10 +180,10 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                   </div>
                   <div>
                     <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 block">
-                      Total Deposits
+                      {t('archive.totalDeposits')}
                     </span>
                     <span className="text-sm font-bold font-mono text-emerald-400">
-                      {formatDZD(totalDeposits)}
+                      {formatCurrency(totalDeposits)}
                     </span>
                   </div>
                 </div>
@@ -184,10 +194,10 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                   </div>
                   <div>
                     <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 block">
-                      Total Withdrawals
+                      {t('archive.totalWithdrawals')}
                     </span>
                     <span className="text-sm font-bold font-mono text-rose-400">
-                      {formatDZD(totalWithdrawals)}
+                      {formatCurrency(totalWithdrawals)}
                     </span>
                   </div>
                 </div>
@@ -198,10 +208,10 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                   </div>
                   <div>
                     <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 block">
-                      Net Flow
+                      {t('archive.netFlow')}
                     </span>
                     <span className={`text-sm font-bold font-mono ${totalDeposits - totalWithdrawals >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                      {formatDZD(totalDeposits - totalWithdrawals)}
+                      {formatCurrency(totalDeposits - totalWithdrawals)}
                     </span>
                   </div>
                 </div>
@@ -212,10 +222,10 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
             {currentSummaries.length === 0 ? (
               <div className="rounded-lg border border-dashed border-zinc-800 p-12 text-center bg-[#0F0F0F]">
                 <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase block mb-2">
-                  No Transaction Data
+                  {t('archive.noTransactionData')}
                 </span>
                 <p className="text-sm text-zinc-400 max-w-md mx-auto">
-                  Record transactions to see your daily, weekly, and monthly flow summaries.
+                  {t('archive.recordTransactions')}
                 </p>
               </div>
             ) : (
@@ -233,7 +243,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                         <div className="flex items-center gap-4">
                           <div className="flex flex-col items-center justify-center w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-lg">
                             <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">
-                              {periodMode === 'daily' ? 'DAY' : periodMode === 'weekly' ? 'WK' : 'MO'}
+                              {periodMode === 'daily' ? t('archive.day') : periodMode === 'weekly' ? t('archive.week') : t('archive.month')}
                             </span>
                             <span className="text-xs font-bold text-zinc-200 font-mono">
                               {periodMode === 'daily'
@@ -248,7 +258,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                               {period.label}
                             </span>
                             <span className="text-[10px] font-mono text-zinc-500">
-                              {period.count} transactions{dayCount > 1 ? ` across ${dayCount} days` : ''}
+                              {period.count} {t('archive.transactions')}{dayCount > 1 ? ` ${t('archive.acrossDays').replace('{count}', String(dayCount))}` : ''}
                             </span>
                           </div>
                         </div>
@@ -256,26 +266,26 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                         <div className="flex items-center gap-6">
                           <div className="text-right hidden sm:block">
                             <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-500 block">
-                              Deposits
+                              {t('archive.deposits')}
                             </span>
                             <span className="text-xs font-bold font-mono text-emerald-400">
-                              +{formatDZD(period.deposits)}
+                              +{formatCurrency(period.deposits)}
                             </span>
                           </div>
                           <div className="text-right hidden sm:block">
                             <span className="text-[9px] font-bold uppercase tracking-widest text-rose-500 block">
-                              Withdrawals
+                              {t('archive.withdrawals')}
                             </span>
                             <span className="text-xs font-bold font-mono text-rose-400">
-                              -{formatDZD(period.withdrawals)}
+                              -{formatCurrency(period.withdrawals)}
                             </span>
                           </div>
                           <div className="text-right">
                             <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500 block">
-                              Net
+                              {t('archive.net')}
                             </span>
                             <span className={`text-xs font-bold font-mono ${period.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                              {period.net >= 0 ? '+' : ''}{formatDZD(period.net)}
+                              {period.net >= 0 ? '+' : ''}{formatCurrency(period.net)}
                             </span>
                           </div>
                           {isExpanded ? (
@@ -304,16 +314,16 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                                   <div className="flex items-center gap-4">
                                     {day.deposits > 0 && (
                                       <span className="text-[11px] font-bold font-mono text-emerald-400">
-                                        +{formatDZD(day.deposits)}
+                                        +{formatCurrency(day.deposits)}
                                       </span>
                                     )}
                                     {day.withdrawals > 0 && (
                                       <span className="text-[11px] font-bold font-mono text-rose-400">
-                                        -{formatDZD(day.withdrawals)}
+                                        -{formatCurrency(day.withdrawals)}
                                       </span>
                                     )}
                                     <span className={`text-[11px] font-bold font-mono w-24 text-right ${day.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                      {day.net >= 0 ? '+' : ''}{formatDZD(day.net)}
+                                      {day.net >= 0 ? '+' : ''}{formatCurrency(day.net)}
                                     </span>
                                   </div>
                                 </div>
@@ -325,14 +335,14 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                             <div className="p-4 bg-zinc-900/20">
                               <div className="flex items-center justify-between mb-3">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                                  Breakdown
+                                  {t('archive.breakdown')}
                                 </span>
                                 <div className="flex gap-4">
                                   <span className="text-[10px] font-bold text-emerald-400">
-                                    +{formatDZD(period.deposits)}
+                                    +{formatCurrency(period.deposits)}
                                   </span>
                                   <span className="text-[10px] font-bold text-rose-400">
-                                    -{formatDZD(period.withdrawals)}
+                                    -{formatCurrency(period.withdrawals)}
                                   </span>
                                 </div>
                               </div>
@@ -340,7 +350,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                               {period.deposits > 0 && (
                                 <div className="mb-2">
                                   <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
-                                    <span>Deposits</span>
+                                    <span>{t('archive.deposits')}</span>
                                     <span>{((period.deposits / (period.deposits + period.withdrawals)) * 100).toFixed(0)}%</span>
                                   </div>
                                   <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
@@ -354,7 +364,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                               {period.withdrawals > 0 && (
                                 <div>
                                   <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
-                                    <span>Withdrawals</span>
+                                    <span>{t('archive.withdrawals')}</span>
                                     <span>{((period.withdrawals / (period.deposits + period.withdrawals)) * 100).toFixed(0)}%</span>
                                   </div>
                                   <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
@@ -387,7 +397,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                 <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-600" />
                 <input
                   type="text"
-                  placeholder="Search counterparties or notes..."
+                  placeholder={t('archive.search')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 bg-zinc-900/60 border border-zinc-800/80 rounded text-zinc-200 text-sm focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700 font-sans"
@@ -413,7 +423,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                       : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
-                  All Types
+                  {t('archive.allTypes')}
                 </button>
                 <button
                   onClick={() => setFilterType('deposit')}
@@ -423,7 +433,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                       : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
-                  Deposits
+                  {t('archive.depositsFilter')}
                 </button>
                 <button
                   onClick={() => setFilterType('withdrawal')}
@@ -433,7 +443,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                       : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
-                  Withdrawals
+                  {t('archive.withdrawalsFilter')}
                 </button>
               </div>
             </div>
@@ -441,18 +451,18 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
 
           {loading && archivedTransactions.length === 0 ? (
             <div className="text-center py-12">
-              <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase">
-                Loading Archived Records...
-              </span>
+                <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase">
+                  {t('archive.loading')}
+                </span>
             </div>
           ) : filteredArchived.length === 0 ? (
             <div className="rounded-lg border border-dashed border-zinc-800 p-12 text-center bg-[#0F0F0F]">
-              <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase block mb-2">
-                No Archived Records Located
-              </span>
-              <p className="text-sm text-zinc-400 max-w-md mx-auto">
-                Your archive is empty. Archive transactions from the ledger to manage historical data here.
-              </p>
+                <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase block mb-2">
+                  {t('archive.empty')}
+                </span>
+                <p className="text-sm text-zinc-400 max-w-md mx-auto">
+                  {t('archive.archiveEmpty')}
+                </p>
             </div>
           ) : (
             <div className="space-y-8">
@@ -470,22 +480,22 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                       <thead>
                         <tr className="border-b border-zinc-900 bg-zinc-950/40">
                           <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                            Recipient & Gate Info
+                            {t('archive.recipient')}
                           </th>
                           <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                            Original Date
+                            {t('archive.original')}
                           </th>
                           <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                            Amount & Type
+                            {t('ledger.amount')}
                           </th>
                           <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                            Archived Date
+                            {t('archive.archivedDate')}
                           </th>
                           <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans">
-                            Comments / Notes
+                            {t('archive.comments')}
                           </th>
                           <th className="px-4 py-3 text-[9px] font-bold uppercase tracking-widest text-zinc-500 font-sans text-right">
-                            Actions
+                            {t('archive.actions')}
                           </th>
                         </tr>
                       </thead>
@@ -503,7 +513,7 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                                     {tx.recipient}
                                   </span>
                                   <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mt-0.5">
-                                    {tx.gate?.name || 'Gate Reference'} ({tx.gate?.code || 'N/A'})
+                                    {tx.gate?.name || t('archive.gateReference')} ({tx.gate?.code || t('archive.na')})
                                   </span>
                                 </div>
                               </td>
@@ -524,13 +534,13 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                                       tx.type === 'deposit' ? 'text-emerald-400' : 'text-rose-400'
                                     }`}
                                   >
-                                    {tx.type === 'deposit' ? '+' : '-'} {formatDZD(Math.abs(tx.amount))}
+                                    {tx.type === 'deposit' ? '+' : '-'} {formatCurrency(Math.abs(tx.amount))}
                                   </span>
                                 </div>
                               </td>
 
                               <td className="px-4 py-4 text-xs text-zinc-400 font-mono">
-                                {tx.archived_at ? formatDate(tx.archived_at) : 'N/A'}
+                                {tx.archived_at ? formatDate(tx.archived_at) : t('archive.na')}
                               </td>
 
                               <td className="px-4 py-4 max-w-[200px]">
@@ -548,28 +558,35 @@ export const Archive: React.FC<ArchiveProps> = ({ onDeleteTransaction }) => {
                                         onClick={() => toggleComment(tx.id)}
                                         className="text-[10px] text-zinc-600 hover:text-zinc-400 mt-1 font-sans transition-colors"
                                       >
-                                        {isExpanded ? 'Show less' : 'Show more'}
+                                        {isExpanded ? t('archive.showLess') : t('archive.showMore')}
                                       </button>
                                     )}
                                   </div>
                                 ) : (
-                                  <span className="text-xs text-zinc-600">No notes</span>
+                                  <span className="text-xs text-zinc-600">{t('archive.noNotes')}</span>
                                 )}
                               </td>
 
                               <td className="px-4 py-4">
                                 <div className="flex justify-end gap-1.5">
                                   <button
+                                    onClick={() => onOpenInvoice(tx.recipient)}
+                                    className="p-1.5 bg-emerald-950/20 border border-emerald-900/30 rounded hover:bg-emerald-900/30 transition-colors text-emerald-400 hover:text-emerald-300 group"
+                                    title="Generate Invoice"
+                                  >
+                                    <FileText className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                  </button>
+                                  <button
                                     onClick={() => handleRestore(tx.id)}
                                     className="p-1.5 bg-blue-950/20 border border-blue-900/30 rounded hover:bg-blue-900/30 transition-colors text-blue-400 hover:text-blue-300 group"
-                                    title="Restore from archive"
+                                    title={t('archive.restoreTitle')}
                                   >
                                     <RotateCcw className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                   </button>
                                   <button
                                     onClick={() => onDeleteTransaction(tx.id)}
                                     className="p-1.5 bg-red-950/20 border border-red-900/30 rounded hover:bg-red-900/30 transition-colors text-red-400 hover:text-red-300 group"
-                                    title="Permanently delete"
+                                    title={t('archive.deleteTitle')}
                                   >
                                     <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
                                   </button>

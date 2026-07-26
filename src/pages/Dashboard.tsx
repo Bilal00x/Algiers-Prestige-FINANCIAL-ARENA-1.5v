@@ -1,23 +1,30 @@
 import React from 'react';
 import { useFinancial } from '../contexts/FinancialContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { formatDZD, getMonthKey, formatMonthLabel } from '../utils/format';
+import { formatCurrency, getMonthKey, formatMonthLabel } from '../utils/format';
 import { downloadCSV, triggerPrint } from '../utils/export';
 import { GateCard } from '../components/GateCard';
-import { Landmark, TrendingUp, TrendingDown, Layers, Loader2, ArrowRight, Download, Printer } from 'lucide-react';
+import { Landmark, TrendingUp, TrendingDown, Layers, Loader2, ArrowRight, Download, Printer, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { MoneyAdjuster } from '../components/ui/MoneyAdjuster';
 
 interface DashboardProps {
   onEditGate: (id: number) => void;
   onDeleteGate: (id: number) => void;
+  onOpenInvoice: () => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate, onOpenInvoice }) => {
   const { gates, transactions, loading } = useFinancial();
-  const { t, formatCurrency } = useSettings();
+  const { t } = useSettings();
   const navigate = useNavigate();
 
   const totalBalance = gates.reduce((sum, g) => sum + g.balance, 0);
+  const primaryCurrency = (() => {
+    const freq: Record<string, number> = {};
+    gates.forEach(g => { freq[g.currency] = (freq[g.currency] || 0) + 1; });
+    return Object.entries(freq).sort((a, b) => b[1] - a[1])[0]?.[0] || 'DZD';
+  })();
   
   const totalDeposits = transactions
     .filter(t => t.type === 'deposit')
@@ -40,9 +47,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-4 border-b border-zinc-900 mb-6">
         <div>
-          <span className="text-[10px] font-mono tracking-[0.2em] text-zinc-500 uppercase">
+          <span className="text-sm font-mono tracking-wide text-zinc-400 uppercase">
             {t('dashboard.subtitle')}
           </span>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans mt-1">
@@ -69,7 +76,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
                 {t('dashboard.totalLiquidity')}
               </span>
               <h2 className="text-xl font-bold tracking-tight text-white font-mono mt-1.5">
-                {formatCurrency(totalBalance)}
+                {formatCurrency(totalBalance, primaryCurrency)}
               </h2>
             </div>
             <div className="p-2 bg-zinc-900 border border-zinc-800 rounded">
@@ -86,7 +93,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
                 {t('dashboard.totalDeposits')}
               </span>
               <h2 className="text-xl font-bold tracking-tight text-emerald-400 font-mono mt-1.5">
-                {formatCurrency(totalDeposits)}
+                {formatCurrency(totalDeposits, primaryCurrency)}
               </h2>
             </div>
             <div className="p-2 bg-emerald-950/20 border border-emerald-900/30 rounded">
@@ -103,7 +110,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
                 {t('dashboard.totalWithdrawals')}
               </span>
               <h2 className="text-xl font-bold tracking-tight text-rose-400 font-mono mt-1.5">
-                {formatCurrency(totalWithdrawals)}
+                {formatCurrency(totalWithdrawals, primaryCurrency)}
               </h2>
             </div>
             <div className="p-2 bg-rose-950/20 border border-rose-900/30 rounded">
@@ -130,6 +137,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
         </div>
       </div>
 
+
       {/* Charts Section */}
       {gates.length > 0 && transactions.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -137,7 +145,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
           <div className="bg-[#0F0F0F] border border-zinc-800 rounded-lg p-5">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full" />
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Gate Balance Distribution</h3>
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('dashboard.gateDistribution')}</h3>
             </div>
             {(() => {
               const maxBalance = Math.max(...gates.map(g => g.balance), 1);
@@ -148,16 +156,17 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
                     return (
                       <div key={gate.id} className="space-y-1">
                         <div className="flex justify-between text-[10px]">
-                          <span className="text-zinc-300 font-semibold truncate mr-2">{gate.name}</span>
-                          <span className="text-zinc-400 font-mono">{formatDZD(gate.balance)}</span>
+                          <span className="text-zinc-300 font-semibold truncate mr-2 cursor-pointer hover:text-emerald-400 transition-colors">{gate.name}</span>
+                          <span className="text-zinc-400 font-mono">{formatCurrency(gate.balance, gate.currency)}</span>
                         </div>
                         <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-zinc-500 to-zinc-300 rounded-full transition-all"
                             style={{ width: `${pct}%` }}
                           />
-                        </div>
-                      </div>
+</div>
+      <MoneyAdjuster />
+      </div>
                     );
                   })}
                 </div>
@@ -169,7 +178,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
           <div className="bg-[#0F0F0F] border border-zinc-800 rounded-lg p-5">
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full" />
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Monthly Flow</h3>
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">{t('dashboard.monthlyFlow')}</h3>
             </div>
             {(() => {
               const byMonth = transactions.reduce<Record<string, { deposits: number; withdrawals: number }>>((acc, tx) => {
@@ -190,12 +199,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
                         <div
                           className="w-2.5 bg-emerald-500/80 rounded-t"
                           style={{ height: `${(vals.deposits / maxVal) * 100}%` }}
-                          title={`Deposits: ${formatDZD(vals.deposits)}`}
+                          title={`Deposits: ${formatCurrency(vals.deposits, primaryCurrency)}`}
                         />
                         <div
                           className="w-2.5 bg-rose-500/80 rounded-t"
                           style={{ height: `${(vals.withdrawals / maxVal) * 100}%` }}
-                          title={`Withdrawals: ${formatDZD(vals.withdrawals)}`}
+                          title={`Withdrawals: ${formatCurrency(vals.withdrawals, primaryCurrency)}`}
                         />
                       </div>
                       <span className="text-[8px] font-mono text-zinc-600 mt-1 truncate w-full text-center">
@@ -240,8 +249,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
               <Printer className="w-3 h-3" />
               Print
             </button>
+            <button
+              onClick={onOpenInvoice}
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-emerald-950/20 border border-emerald-900/30 rounded text-[9px] font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40 transition-all"
+            >
+              <FileText className="w-3 h-3" />
+              Invoice
+            </button>
             <span className="text-xs text-zinc-500 font-mono">
-              {gates.length} slots operational
+              {t('dashboard.slotsOperational').replace('{count}', String(gates.length))}
             </span>
           </div>
         </div>
@@ -274,21 +290,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 bg-zinc-500 rounded-full" />
             <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-300">
-              Recent Ledger Streams
+              {t('dashboard.recentStreams')}
             </h2>
           </div>
           <button
             onClick={() => navigate('/ledger')}
             className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 transition-colors font-sans"
           >
-            Audit Full Ledger
+            {t('dashboard.auditLedger')}
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {transactions.length === 0 ? (
           <div className="text-center py-6">
-            <span className="text-xs text-zinc-500 font-mono">No transaction stream recorded.</span>
+            <span className="text-xs text-zinc-500 font-mono">{t('dashboard.noStream')}</span>
           </div>
         ) : (
           <div className="space-y-3.5">
@@ -321,7 +337,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onEditGate, onDeleteGate }
                       tx.type === 'deposit' ? 'text-emerald-400' : 'text-rose-400'
                     }`}
                   >
-                    {tx.type === 'deposit' ? '+' : '-'} {formatDZD(Math.abs(tx.amount))}
+                    {tx.type === 'deposit' ? '+' : '-'} {formatCurrency(Math.abs(tx.amount), primaryCurrency)}
                   </span>
                   <span
                     className={`text-[9px] font-semibold uppercase tracking-wider ${

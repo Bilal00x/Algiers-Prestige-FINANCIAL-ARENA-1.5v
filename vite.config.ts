@@ -11,7 +11,7 @@ export default defineConfig(async ({ mode }) => {
     plugins.push(m.sourceTags());
   } catch {}
 
-  const env = loadEnv(mode, process.cwd(), ['VITE_', 'NEXT_PUBLIC_', 'TURSO_']);
+  const env = loadEnv(mode, process.cwd(), ['VITE_', 'NEXT_PUBLIC_', 'STORAGE_']);
   const processEnvDefines: Record<string, string> = {};
   for (const [key, value] of Object.entries(env)) {
     processEnvDefines[`process.env.${key}`] = JSON.stringify(value);
@@ -19,7 +19,7 @@ export default defineConfig(async ({ mode }) => {
 
   return {
     plugins,
-    envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'TURSO_'],
+    envPrefix: ['VITE_', 'NEXT_PUBLIC_', 'STORAGE_'],
     define: processEnvDefines,
   };
 })

@@ -31,7 +31,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (savedLanguage && ['ar', 'en', 'fr'].includes(savedLanguage)) {
         setLanguageState(savedLanguage);
       }
-      if (savedCurrency && ['DZD', 'USD', 'EUR', 'GBP'].includes(savedCurrency)) {
+      if (savedCurrency && ['DZD', 'USD', 'EUR', 'GBP', 'JPY', 'CNY', 'CAD', 'AUD', 'CHF', 'AED'].includes(savedCurrency)) {
         setCurrencyState(savedCurrency);
       }
 
@@ -96,17 +96,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const formatCurrency = (amount: number): string => {
     const symbol = currencySymbols[currency];
-    const formatted = amount.toLocaleString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+    const formatted = amount.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
-    
-    // وضع رمز العملة بناءً على اللغة
-    if (language === 'ar') {
-      return `${formatted} ${symbol}`;
-    } else {
-      return `${symbol}${formatted}`;
-    }
+    return `${formatted} ${symbol}`;
   };
 
   return (

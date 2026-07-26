@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { X, Clock, Shield, FileText, Plus, Pencil, Trash2, Archive, RotateCcw, Check, Search, Download } from 'lucide-react';
 import { getAuditLog, AuditEntry } from '../utils/audit';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface AuditLogModalProps {
   isOpen: boolean;
@@ -26,6 +27,7 @@ const actionColors: Record<string, string> = {
 };
 
 export const AuditLogModal: React.FC<AuditLogModalProps> = ({ isOpen, onClose }) => {
+  const { formatCurrency } = useSettings();
   const [search, setSearch] = useState('');
   const [actionFilter, setActionFilter] = useState<string>('all');
 
@@ -134,6 +136,11 @@ export const AuditLogModal: React.FC<AuditLogModalProps> = ({ isOpen, onClose })
                         <span className="text-[10px] font-mono text-zinc-600">#{entry.entityId}</span>
                       </div>
                       <p className="text-xs text-zinc-300 mt-1">{entry.summary}</p>
+                      {entry.amount && (
+                        <span className="text-xs font-bold font-mono text-emerald-400 mt-0.5 block">
+                          {formatCurrency(entry.amount)}
+                        </span>
+                      )}
                       <div className="flex items-center gap-2 mt-1 text-[9px] font-mono text-zinc-600">
                         <Clock className="w-3 h-3" />
                         {new Date(entry.timestamp).toLocaleString('fr-DZ')}

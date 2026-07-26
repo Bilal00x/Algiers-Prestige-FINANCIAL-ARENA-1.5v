@@ -11,6 +11,8 @@ import {
   archiveTransactionApi,
 } from '../services/api';
 import { addAuditEntry } from '../utils/audit';
+import { useSettings } from './SettingsContext';
+import { Currency, currencySymbols } from '../utils/i18n';
 
 export interface Gate {
   id: number;
@@ -78,6 +80,7 @@ export const FinancialProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const { currency, language } = useSettings();
 
   // LocalStorage fallback
   const loadFromLocalStorage = () => {
@@ -250,9 +253,19 @@ export const FinancialProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const createTransaction = async (tx: Omit<Transaction, 'id' | 'created_at' | 'gate' | 'archived' | 'archived_at'>) => {
     try {
+      // Update gate balance
+      const updatedGates = gates.map(g => {
+        if (g.id === tx.gate_id) {
+          const delta = tx.type === 'deposit' ? Math.abs(tx.amount) : -Math.abs(tx.amount);
+          return { ...g, balance: g.balance + delta };
+        }
+        return g;
+      });
+
       try {
         const newTx = await createTransactionApi(tx);
         setTransactions(prev => [newTx, ...prev]);
+        setGates(updatedGates);
       } catch {
         const newTx: Transaction = {
           ...tx,
@@ -263,11 +276,15 @@ export const FinancialProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         } as Transaction;
         const updatedTransactions = [...transactions, newTx];
         saveTransactionsToLocal(updatedTransactions, archivedTransactions);
+        saveGatesToLocal(updatedGates);
+        setGates(updatedGates);
       }
       
-      addAuditEntry({ action: 'create', entity: 'transaction', entityId: 0, summary: `${tx.type === 'deposit' ? 'Deposit' : 'Withdrawal'} of ${Math.abs(tx.amount)} DZD for ${tx.recipient}`, performedBy: getCurrentUserName() });
+      const sym = currencySymbols[currency as Currency] || currency;
+      const formattedAmt = Math.abs(tx.amount).toLocaleString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US');
+      addAuditEntry({ action: 'create', entity: 'transaction', entityId: 0, summary: `${tx.type === 'deposit' ? 'Deposit' : 'Withdrawal'} of ${formattedAmt} ${sym} for ${tx.recipient}`, performedBy: getCurrentUserName(), amount: Math.abs(tx.amount) });
       const typeLabel = tx.type === 'deposit' ? 'Deposit' : 'Withdrawal';
-      showToast(`${typeLabel} of ${Math.abs(tx.amount)} DZD queued successfully.`, 'success');
+      showToast(`${typeLabel} of ${formattedAmt} ${sym} queued successfully.`, 'success');
       return true;
     } catch (err: any) {
       showToast(err.message || 'Failed to record transaction.', 'error');
