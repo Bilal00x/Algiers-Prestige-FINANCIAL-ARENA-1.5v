@@ -126,7 +126,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 value={regPasscode}
                 onChange={(e) => { setRegPasscode(e.target.value); setError(''); }}
                 placeholder="Passcode"
-                maxLength={20}
+                maxLength={350}
                 className="w-full px-4 py-3 pr-10 bg-zinc-900 border border-zinc-800 rounded text-zinc-200 text-sm text-center font-mono tracking-widest focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700"
               />
               <button type="button" onClick={() => setRegShowPass(!regShowPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
@@ -138,7 +138,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               value={regConfirm}
               onChange={(e) => { setRegConfirm(e.target.value); setError(''); }}
               placeholder="Confirm passcode"
-              maxLength={20}
+              maxLength={350}
               className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded text-zinc-200 text-sm text-center font-mono tracking-widest focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700"
             />
             {displayError && (
@@ -237,7 +237,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                     onChange={(e) => { setPasscode(e.target.value); setError(''); }}
                     placeholder="Enter passcode"
                     autoFocus
-                    maxLength={20}
+                    maxLength={350}
                     className="w-full px-4 py-3 pr-10 bg-zinc-900 border border-zinc-800 rounded text-zinc-200 text-sm text-center font-mono tracking-widest focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700"
                   />
                   <button type="button" onClick={() => setShowPasscode(!showPasscode)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
@@ -289,7 +289,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
                 value={regPasscode}
                 onChange={(e) => { setRegPasscode(e.target.value); setError(''); }}
                 placeholder="Passcode"
-                maxLength={20}
+                maxLength={350}
                 className="w-full px-4 py-3 pr-10 bg-zinc-900 border border-zinc-800 rounded text-zinc-200 text-sm text-center font-mono tracking-widest focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700"
               />
               <button type="button" onClick={() => setRegShowPass(!regShowPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
@@ -302,7 +302,7 @@ export const LockScreen: React.FC<LockScreenProps> = ({ onUnlock }) => {
               value={regConfirm}
               onChange={(e) => { setRegConfirm(e.target.value); setError(''); }}
               placeholder="Confirm passcode"
-              maxLength={20}
+              maxLength={350}
               className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded text-zinc-200 text-sm text-center font-mono tracking-widest focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700"
             />
 

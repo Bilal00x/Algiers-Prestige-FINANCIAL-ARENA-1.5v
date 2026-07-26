@@ -238,7 +238,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
                     value={newPasscode}
                     onChange={(e) => setNewPasscode(e.target.value)}
                     placeholder="Passcode"
-                    maxLength={20}
+                    maxLength={350}
                     className="w-full px-3 py-2 pr-10 bg-zinc-900 border border-zinc-800 rounded text-zinc-200 text-sm font-mono tracking-widest focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700"
                   />
                   <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400">
@@ -251,7 +251,7 @@ export const UserManagementModal: React.FC<UserManagementModalProps> = ({ isOpen
                   value={newConfirm}
                   onChange={(e) => setNewConfirm(e.target.value)}
                   placeholder="Confirm passcode"
-                  maxLength={20}
+                  maxLength={350}
                   className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-200 text-sm font-mono tracking-widest focus:outline-none focus:border-zinc-700 transition-colors placeholder-zinc-700"
                 />
 

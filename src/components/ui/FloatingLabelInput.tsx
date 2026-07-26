@@ -8,11 +8,12 @@ type Props = {
   type?: string;
   placeholder?: string;
   icon?: React.ReactNode;
-  showToggle?: boolean; // password show/hide
+  showToggle?: boolean;
   error?: string;
   disabled?: boolean;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  maxLength?: number;
 };
 
 export const FloatingLabelInput: React.FC<Props> = ({
@@ -26,6 +27,7 @@ export const FloatingLabelInput: React.FC<Props> = ({
   disabled = false,
   value,
   onChange,
+  maxLength,
 }) => {
   const id = useId();
   const [visible, setVisible] = useState(false);
@@ -50,6 +52,7 @@ export const FloatingLabelInput: React.FC<Props> = ({
         disabled={disabled}
         value={value}
         onChange={onChange}
+        maxLength={maxLength}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
       />

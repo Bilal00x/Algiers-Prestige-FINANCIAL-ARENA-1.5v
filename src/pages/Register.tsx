@@ -185,6 +185,7 @@ export default function Register() {
               value={formData.password}
               onChange={handleChange}
               error={errors.password}
+              maxLength={350}
             />
             <div className="mt-2">
               <div className="flex items-center space-x-2">
@@ -201,6 +202,7 @@ export default function Register() {
               value={formData.confirmPassword}
               onChange={handleChange}
               error={errors.confirmPassword}
+              maxLength={350}
             />
           </div>
         );

@@ -1,0 +1,162 @@
+===========================================================
+ تقرير التغييرات الشامل – Algiers Prestige FINANCIAL ARENA
+===========================================================
+ التاريخ: 26 يوليو 2026
+===========================================================
+
+[1] إصلاح الأعطال الأساسية
+----------------------------
+- إصلاح الشاشة البيضاء (white screen crash) عند تحميل التطبيق
+- إضافة مكون MoneyAdjuster للتحكم في المبالغ
+
+[2] إدارة العملات
+------------------
+- إضافة 10 عملات كاملة (DZD, USD, EUR, GBP, JPY, CNY, CAD, AUD, CHF, AED)
+- إضافة الترجمة لجميع العملات في ملف i18n.ts
+- إضافة أسعار الصرف للعملات
+- تعديل SettingsModal ليدعم جميع العملات
+- تعديل GateModal و CombinedModal لاختيار العملة
+
+[3] مكون الفاتورة (InvoiceModal)
+--------------------------------
+- إنشاء InvoiceModal احترافية مع فلترة حسب المستلم
+- إضافة زر Invoice لكل معاملة في صفحات Ledger و Archive
+- إضافة مفاتيح الترجمة للفاتورة
+
+[4] واجهة المستخدم وتجربة المستخدم
+----------------------------------
+- إضافة مكون Navbar محدث مع أزرار من مكون Button
+- إضافة خاصية size لمكون Button (sm, md, lg)
+- إضافة قسم SocialButton للتسجيل عبر وسائل التواصل
+- إضافة شاشة LockScreen لتأمين الجلسة
+- إضافة AuditLogModal لتسجيل الأحداث
+
+[5] تنسيق الأرقام والمال
+-------------------------
+- توحيد تنسيق العملات في الموقع بالكامل:
+  - تعديل دالة formatCurrency في SettingsContext لإرجاع "رقم رمز" بتنسيق en-US
+  - تعديل دالة formatCurrency في utils/format لإرجاع نفس التنسيق
+  - استبدال جميع استدعاءات formatDZD بـ formatCurrency
+- تعديل Dashboard لاستخدام عملة البوابة الأكثر شيوعاً (primaryCurrency) في البطاقات الإجمالية
+- تعديل توزيع الرسم البياني لاستخدام عملة كل بوابة
+
+[6] قاعدة البيانات (مقترح)
+---------------------------
+- تصميم مخطط قاعدة بيانات علاقية متكاملة:
+  - جدول users (المستخدمون)
+  - جدول gates (البوابات المالية)
+  - جدول transactions (المعاملات)
+  - جدول invoices (الفواتير)
+  - جدول exchange_rates (أسعار الصرف)
+  - جدول settings (الإعدادات العامة)
+- إضافة قيود التكامل، المفاتيح الخارجية، وفهارس الأداء
+- إضافة Trigger لتحديث الرصيد تلقائياً عند إضافة معاملة
+
+[7] التدقيق الأمني وإصلاح الثغرات
+=================================
+
+7.1 تشفير كلمات المرور
+-----------------------
+- استبدال SHA-256 بـ bcryptjs مع 12 round salt
+- استخدام bcrypt.hash للتسجيل وتحديث كلمة المرور
+- استخدام bcrypt.compare للتحقق من تسجيل الدخول
+
+7.2 إزالة كلمة المرور المخفية للـ admin
+----------------------------------------
+- حذف الثوابت SEEDED_ADMIN_PASSWORD القديمة
+- إنشاء حساب Admin آمن بكلمة مرور قوية:
+  - قراءة كلمة المرور من متغير البيئة VITE_INITIAL_ADMIN_PASSCODE
+  - إذا لم يُضبط المتغير، توليد كلمة مرور عشوائية 32 حرف
+  - عرض كلمة المرور في Console للتطوير
+- حماية حساب الـ Admin من الحذف أو تغيير الصلاحية
+
+7.3 حماية واجهات API
+---------------------
+- إضافة التحقق بواسطة التوكن (Bearer token) لجميع نقاط API
+- استخدام متغير البيئة API_TOKEN كرمز للتحقق
+- تقييد CORS بـ ALLOWED_ORIGIN بدلاً من "*"
+- إضافة رؤوس الأمان:
+  - X-Content-Type-Options: nosniff
+  - X-Frame-Options: DENY
+  - Referrer-Policy: same-origin
+  - Permissions-Policy: interest-cohort=()
+  - Strict-Transport-Security: max-age=31536000; includeSubDomains
+  - Content-Security-Policy: default-src 'self'
+
+7.4 التحقق من المدخلات (Input Validation)
+----------------------------------------
+- api/gates.js:
+  - التحقق من اسم البوابة (string, trimmed)
+  - التحقق من رمز العملة (تطابق النمط ^[A-Z]{3}$)
+  - التحقق من الرصيد الابتدائي (numeric)
+  - التحقق من id كعدد صحيح
+- api/transactions.js:
+  - التحقق من gate_id كعدد صحيح
+  - التحقق من recipient (string, trimmed)
+  - التحقق من amount (numeric)
+  - التحقق من type (قيم مسموحة: deposit/withdrawal/transfer)
+  - التحقق من status (string, trimmed)
+  - التحقق من id و txId كأعداد صحيحة
+
+7.5 إصلاح أخطاء TypeScript
+--------------------------
+- تعديل onOpenInvoice في Archive.tsx و Ledger.tsx لاستخدام () => onOpenInvoice()
+- إزالة useEffect الزائد في AuthContext
+
+7.6 تحديث ملف البيئة (.env)
+---------------------------
+إضافة المتغيرات:
+  API_TOKEN=supersecrettoken
+  ALLOWED_ORIGIN=http://localhost:5173
+  VITE_INITIAL_ADMIN_PASSCODE=Alg!ersPr3st1g3@2024#Secure
+
+7.7 تثبيت الحزم
+---------------
+- إضافة bcryptjs في package.json
+
+[8] الملفات المتأثرة
+=====================
+- src/contexts/AuthContext.tsx
+- src/contexts/FinancialContext.tsx
+- src/contexts/SettingsContext.tsx
+- src/utils/format.ts
+- src/utils/i18n.ts
+- src/pages/Dashboard.tsx
+- src/pages/Ledger.tsx
+- src/pages/Archive.tsx
+- src/pages/Register.tsx
+- src/pages/Login.tsx
+- src/components/InvoiceModal.tsx
+- src/components/GateCard.tsx
+- src/components/CombinedModal.tsx
+- src/components/GateModal.tsx
+- src/components/SettingsModal.tsx
+- src/components/Navbar.tsx
+- src/components/Button.tsx
+- src/components/SocialButton.tsx
+- src/components/LockScreen.tsx
+- src/components/AuditLogModal.tsx
+- src/components/UserManagementModal.tsx
+- src/services/api.ts
+- src/services/supabase.ts
+- api/gates.js
+- api/transactions.js
+- api/db-client.js
+- .env
+- package.json
+- package-lock.json
+
+[9] التوصيات المتبقية
+======================
+1. نقل تخزين المستخدمين إلى قاعدة بيانات خادمية (مثل Supabase Auth)
+2. استخدام JWT مع HttpOnly / Secure / SameSite cookies لإدارة الجلسات
+3. إضافة CSRF tokens للطلبات المعدلة للحالة
+4. تطبيق تحديد معدل الطلبات (Rate Limiting) على API
+5. تحديث تبعيات npm (npm audit fix)
+6. تشفير جميع المتغيرات البيئية الحساسة على منصة الاستضافة
+7. إعداد مراقبة وتسجيل الأحداث الأمنية (Audit Log)
+8. تفعيل CSP غير صارم مع nonces عند الحاجة
+
+===========================================================
+ نهاية التقرير
+===========================================================
